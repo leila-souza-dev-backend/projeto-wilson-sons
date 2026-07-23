@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useRef, useState, type DragEvent, type ChangeEvent } from "react";
+import centroImg from "@/assets/wilson-sons-centro.jpg.asset.json";
+import logoImg from "@/assets/wilson-sons-logo.jpg.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -97,7 +99,7 @@ function Index() {
       <nav className="navbar">
         <div className="nav-content">
           <div className="logo">
-            <div className="logo-img">WS</div>
+            <img src={logoImg.url} alt="Wilson Sons" className="logo-img" />
             Wilson Sons
           </div>
           <div className="user-profile">Empresa de Logística</div>
@@ -107,10 +109,7 @@ function Index() {
       <main className="app-container">
         <section className="body-gallery">
           <div className="gallery-item">
-            <img
-              src="https://images.unsplash.com/photo-1577415124269-fc1140a69e91?w=800&q=80"
-              alt="Centro logístico portuário"
-            />
+            <img src={centroImg.url} alt="Centro logístico Wilson Sons" />
             <div className="gallery-caption">Centro Logístico Wilson Sons</div>
           </div>
           <div className="gallery-item">
