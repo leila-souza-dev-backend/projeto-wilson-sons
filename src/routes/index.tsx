@@ -68,23 +68,31 @@ function Index() {
     setLoading(true);
     setStatus(null);
     setResult(null);
-    await new Promise((r) => setTimeout(r, 1600));
-    const mock = {
-      documento: file.name,
-      cliente: "Wilson Sons",
-      centro_logistico: "Operações Portuárias",
-      data_analise: new Date().toISOString(),
-      materiais: [
-        { codigo: "MAT-0421", descricao: "Cabo de aço 12mm", quantidade: 120, unidade: "m" },
-        { codigo: "MAT-0518", descricao: "Manilha reta 3/4\"", quantidade: 40, unidade: "un" },
-        { codigo: "MAT-0733", descricao: "Corrente galvanizada 10mm", quantidade: 85, unidade: "m" },
-        { codigo: "MAT-0902", descricao: "Bóia de amarração", quantidade: 6, unidade: "un" },
-      ],
-      total_itens: 4,
-    };
-    setResult(JSON.stringify(mock, null, 2));
-    setStatus({ type: "success", msg: "Análise concluída com sucesso." });
-    setLoading(false);
+    try {
+      const formData = new FormData();
+      formData.append("file", file, file.name);
+      const res = await fetch("https://hook.us2.make.com/fq7ki30wrioaxs579l67ifhqr2c2dd5q", {
+        method: "POST",
+        body: formData,
+      });
+      const text = await res.text();
+      if (!res.ok) throw new Error(`Erro ${res.status}: ${text}`);
+      let pretty = text;
+      try {
+        pretty = JSON.stringify(JSON.parse(text), null, 2);
+      } catch {
+        // resposta não-JSON, mantém texto puro
+      }
+      setResult(pretty);
+      setStatus({ type: "success", msg: "Análise concluída com sucesso." });
+    } catch (err) {
+      setStatus({
+        type: "error",
+        msg: err instanceof Error ? err.message : "Falha ao enviar o arquivo.",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const copy = async () => {
