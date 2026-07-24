@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useRef, useState, type DragEvent, type ChangeEvent } from "react";
-import centroImg from "@/assets/wilson-sons-centro.jpg.asset.json";
-import logoImg from "@/assets/wilson-sons-logo.jpg.asset.json";
+import centroImg from "@/assets/imagem/wilson-sons-centro.jpg.asset.json";
+import logoImg from "@/assets/imagem/wilson-sons-logo.jpg.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
