@@ -24,12 +24,6 @@ Este projeto foi construído utilizando as seguintes tecnologias e ferramentas m
 
 ---
 
-## 🖼️ Galeria do Sistema
-
-| Centro Logístico | Operações Portuárias |
-| :---: | :---: |
-| ![Centro Logístico Wilson Sons](will1.jpg) | ![Operações Portuárias](images.jpg) |
-
 ---
 
 ## ⚙️ Funcionalidades
