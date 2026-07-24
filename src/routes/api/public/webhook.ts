@@ -1,10 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { webhookPayloadSchema, type WebhookPayload } from "@/lib/webhook-schema";
 
 // Armazena os payloads recebidos do Make em memória (por jobId).
 // Observação: a memória é por instância do worker; para produção
 // utilize um banco de dados / Lovable Cloud.
-const store = ((globalThis as unknown as { __wsWebhookStore?: Map<string, { data: unknown; receivedAt: number }> }).__wsWebhookStore ??=
-  new Map<string, { data: unknown; receivedAt: number }>());
+type StoredEntry = { data: WebhookPayload; receivedAt: number };
+const store = ((globalThis as unknown as { __wsWebhookStore?: Map<string, StoredEntry> }).__wsWebhookStore ??=
+  new Map<string, StoredEntry>());
+
+// Limite defensivo do corpo recebido (1 MB) para evitar abuso.
+const MAX_BODY_BYTES = 1_000_000;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
