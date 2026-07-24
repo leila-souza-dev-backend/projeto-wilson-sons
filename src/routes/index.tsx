@@ -69,20 +69,51 @@ function Index() {
     setStatus(null);
     setResult(null);
     try {
+      const jobId =
+        (globalThis.crypto?.randomUUID?.() as string | undefined) ??
+        `job-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+      const callbackUrl = `${window.location.origin}/api/public/webhook?jobId=${encodeURIComponent(jobId)}`;
+
       const formData = new FormData();
       formData.append("file", file, file.name);
+      formData.append("jobId", jobId);
+      formData.append("callbackUrl", callbackUrl);
+
       const res = await fetch("https://hook.us2.make.com/fq7ki30wrioaxs579l67ifhqr2c2dd5q", {
         method: "POST",
         body: formData,
       });
-      const text = await res.text();
-      if (!res.ok) throw new Error(`Erro ${res.status}: ${text}`);
-      let pretty = text;
+      const immediate = await res.text();
+      if (!res.ok) throw new Error(`Erro ${res.status}: ${immediate}`);
+
+      // Se o Make já respondeu com JSON no corpo, usamos direto.
+      let payload: unknown = null;
       try {
-        pretty = JSON.stringify(JSON.parse(text), null, 2);
+        payload = JSON.parse(immediate);
       } catch {
-        // resposta não-JSON, mantém texto puro
+        // resposta não-JSON — vamos aguardar o webhook
       }
+
+      // Caso contrário, faz polling no endpoint interno.
+      if (payload === null || (typeof payload === "string" && payload.trim() === "Accepted")) {
+        const deadline = Date.now() + 2 * 60 * 1000; // 2 min
+        while (Date.now() < deadline) {
+          await new Promise((r) => setTimeout(r, 1500));
+          const poll = await fetch(`/api/public/webhook?jobId=${encodeURIComponent(jobId)}`);
+          if (poll.ok) {
+            const body = (await poll.json()) as { ready: boolean; data?: unknown };
+            if (body.ready) {
+              payload = body.data;
+              break;
+            }
+          }
+        }
+        if (payload === null) throw new Error("Tempo esgotado aguardando o retorno do Make.");
+      }
+
+      const pretty =
+        typeof payload === "string" ? payload : JSON.stringify(payload, null, 2);
       setResult(pretty);
       setStatus({ type: "success", msg: "Análise concluída com sucesso." });
     } catch (err) {
